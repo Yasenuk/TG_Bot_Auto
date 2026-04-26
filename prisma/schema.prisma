@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../server/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Trip {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  carName     String
+  consumption Float
+  fuelPrice   Float
+  city        String
+  km          Float
+  fuelUsed    Float
+  cost        Float
+  createdAt   DateTime @default(now())
+}
