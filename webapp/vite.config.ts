@@ -5,6 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: ["carry-unburned-payback.ngrok-free.dev"],
+    allowedHosts: ["https://carry-unburned-payback.ngrok-free.dev"],
   },
 })

@@ -7,6 +7,7 @@ const router = Router();
 router.post("/create", async (req, res) => {
 	try {
 		const { userId, carName, consumption, fuelPrice, trips } = req.body;
+
 		const results = trips.map((t: any) => {
 			const { fuelUsed, cost } = calculate(consumption, t.km, fuelPrice);
 
@@ -22,8 +23,9 @@ router.post("/create", async (req, res) => {
 			};
 		});
 
-		const resTrips = await createTrips(results);
-		res.json(resTrips);
+		await createTrips(results);
+		
+		res.json(results);
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Помилка створення" });

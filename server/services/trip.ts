@@ -8,7 +8,7 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 export async function createTrips(results = []) {
-	return await prisma.trip.createMany({ data: results });
+	await prisma.trip.createMany({ data: results });
 }
 
 export function getTrip() {
