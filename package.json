@@ -1,0 +1,20 @@
+{
+  "name": "tg_bot_auto",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Yasenuk/TG_Bot_Auto#readme",
+  "bugs": {
+    "url": "https://github.com/Yasenuk/TG_Bot_Auto/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yasenuk/TG_Bot_Auto.git"
+  },
+  "license": "MIT",
+  "author": "Yatseniuk Vladyslav",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
