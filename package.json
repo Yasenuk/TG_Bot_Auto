@@ -15,7 +15,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"cd bot && nodemon --watch . --ext ts --exec ts-node bot.ts\" \"cd server && nodemon --watch . --ext ts --exec ts-node index.ts\" \"cd webapp && npm run dev\" \"ngrok start --all --config=ngrok.yml\""
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -27,6 +27,7 @@
     "morgan": "^1.10.1",
     "ngrok": "^5.0.0-beta.2",
     "pg": "^8.20.0",
+    "sequelize": "^6.37.8",
     "telegraf": "^4.16.3",
     "zod": "^4.3.6"
   },
@@ -38,6 +39,7 @@
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.14",
     "prisma": "^7.8.0",
+    "sass-embedded": "^1.99.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
   }

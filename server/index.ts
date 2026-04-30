@@ -1,12 +1,9 @@
 import express from "express";
 
-import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
 
 import trips from "./routes/trip";
-
-dotenv.config();
 
 const app = express();
 
