@@ -11,15 +11,39 @@ datasource db {
   provider = "postgresql"
 }
 
+model Department {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  trips     Trip[]
+  createdAt DateTime @default(now())
+}
+
+model Car {
+  id                 Int      @id @default(autoincrement())
+  name               String   @unique
+  consumption        Float
+  fuelPrice          Float
+  amortizationPerKm  Float
+  trips              Trip[]
+  createdAt          DateTime @default(now())
+}
+
 model Trip {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  carName     String
-  consumption Float
-  fuelPrice   Float
-  city        String
-  km          Float
-  fuelUsed    Float
-  cost        Float
-  createdAt   DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+
+  userId        Int
+
+  carId         Int
+  car           Car      @relation(fields: [carId], references: [id])
+
+  departmentId  Int
+  department    Department @relation(fields: [departmentId], references: [id])
+
+  km            Float
+  fuelUsed      Float
+  fuelCost      Float
+  amortization  Float
+  totalCost     Float
+
+  createdAt     DateTime @default(now())
 }
