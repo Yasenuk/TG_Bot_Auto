@@ -4,8 +4,10 @@ import styles from "./from.module.scss";
 
 function From() {
 	const [trips, setTrips] = useState([{ city: "", km: 0 }]);
+	const [cars, setCars] = useState<any[]>([]);
+	const [departments, setDepartments] = useState<any[]>([]);
+
 	const [isDark, setIsDark] = useState(false);
-	const [suggestions, setSuggestions] = useState<Record<number, string[]>>({});
 
 	useEffect(() => {
 		const tg = (window as any).Telegram?.WebApp;
@@ -18,38 +20,19 @@ function From() {
 		setIsDark(tg.colorScheme === "dark");
 	}, []);
 
-	const searchCity = async (value: string) => {
-		if (value.length < 2) return [];
+	useEffect(() => {
+		const load = async () => {
+			const [carsRes, depRes] = await Promise.all([
+				fetch("/api/cars"),
+				fetch("/api/departments")
+			]);
 
-		const res = await fetch(
-			`http://api.geonames.org/searchJSON?country=UA&name_startsWith=${value}&maxRows=5&username=demo`
-		);
+			setCars(await carsRes.json());
+			setDepartments(await depRes.json());
+		};
 
-		const data = await res.json();
-
-		return data.geonames.map((item: any) => item.name);
-	};
-
-	const handleCityChange = async (value: string, index: number) => {
-		const copy = [...trips];
-		copy[index].city = value;
-		setTrips(copy);
-
-		if (value.length < 2) {
-			setSuggestions(prev => ({
-				...prev,
-				[index]: []
-			}));
-			return;
-		}
-
-		const result = await searchCity(value);
-
-		setSuggestions(prev => ({
-			...prev,
-			[index]: result
-		}));
-	};
+		load();
+	}, []);
 
 	const [form, setForm] = useState({
 		carName: "",
@@ -119,31 +102,12 @@ function From() {
 						className={styles.form__input}
 						placeholder="Місто"
 						value={t.city}
-						onChange={e => handleCityChange(e.target.value, i)}
+						onChange={e => {
+							const copy = [...trips];
+							copy[i].city = e.target.value;
+							setTrips(copy);
+						}}
 					/>
-
-					{suggestions[i]?.length > 0 && (
-						<div className={styles.suggestions}>
-							{suggestions[i].map((city, idx) => (
-								<div
-									key={idx}
-									onClick={() => {
-										const copy = [...trips];
-										copy[i].city = city;
-										setTrips(copy);
-
-										setSuggestions(prev => ({
-											...prev,
-											[i]: []
-										}));
-									}}
-									className={styles.suggestion}
-								>
-									{city}
-								</div>
-							))}
-						</div>
-					)}
 
 					<input
 						className={styles.form__input}
