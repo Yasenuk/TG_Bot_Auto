@@ -1,23 +1,49 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
+import { prisma } from "../prisma";
 
-import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
+export async function createTrip(data: any) {
+  return prisma.trip.create({
+    data: {
+      userId: data.userId,
+      carName: data.carName,
 
-const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL!
-});
+      amortizationPerKm: data.amortizationPerKm,
+      fuelPrice: data.fuelPrice,
+      consumption: data.consumption,
+      totalKm: data.totalKm,
 
-const prisma = new PrismaClient({ adapter });
+      totalAmortization: data.totalAmortization,
+      totalFuelLiters: data.totalFuelLiters,
+      totalFuelCost: data.totalFuelCost,
 
-export async function createTrips(results = []) {
-	await prisma.trip.createMany({ data: results });
+      cities: {
+        create: data.cities.map((c: any) => ({
+          cityId: c.cityId,
+
+          amortizationShare: data.perCity.amortization,
+          fuelCostShare: data.perCity.fuelCost,
+          fuelLitersShare: data.perCity.fuelLiters,
+        })),
+      },
+    },
+
+    include: {
+      cities: {
+        include: {
+          city: true,
+        },
+      },
+    },
+  });
 }
 
-export async function getTripsByUserId(userId: number) {
-	return await prisma.trip.findMany({
-		where: {
-			userId
-		}
-	});
+export async function getTrips() {
+  return prisma.trip.findMany({
+    include: {
+      cities: {
+        include: {
+          city: true,
+        },
+      },
+    },
+  });
 }

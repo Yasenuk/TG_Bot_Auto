@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,39 +6,42 @@ datasource db {
   provider = "postgresql"
 }
 
-model Department {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  trips     Trip[]
-  createdAt DateTime @default(now())
-}
-
-model Car {
-  id                 Int      @id @default(autoincrement())
-  name               String   @unique
-  consumption        Float
-  fuelPrice          Float
-  amortizationPerKm  Float
-  trips              Trip[]
-  createdAt          DateTime @default(now())
-}
-
 model Trip {
-  id            Int      @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  carName           String
 
-  userId        Int
+  amortizationPerKm Float
+  fuelPrice         Float
+  consumption       Float
+  totalKm           Float
 
-  carId         Int
-  car           Car      @relation(fields: [carId], references: [id])
+  totalAmortization Float
+  totalFuelLiters   Float
+  totalFuelCost     Float
 
-  departmentId  Int
-  department    Department @relation(fields: [departmentId], references: [id])
+  createdAt         DateTime @default(now())
 
-  km            Float
-  fuelUsed      Float
-  fuelCost      Float
-  amortization  Float
-  totalCost     Float
+  cities            TripCity[]
+}
 
-  createdAt     DateTime @default(now())
+model City {
+  id    Int    @id @default(autoincrement())
+  name  String
+
+  trips TripCity[]
+}
+
+model TripCity {
+  id Int @id @default(autoincrement())
+
+  tripId Int
+  cityId Int
+
+  amortizationShare Float
+  fuelCostShare     Float
+  fuelLitersShare   Float
+
+  trip Trip @relation(fields: [tripId], references: [id])
+  city City @relation(fields: [cityId], references: [id])
 }

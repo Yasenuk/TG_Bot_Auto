@@ -1,10 +1,7 @@
-export type Trip = {
-	userId: any,
-	carName: any,
-	consumption: any,
-	fuelPrice: any,
-	city: any,
-	km: any,
-	fuelUsed: number,
-	cost: number
+export type TripInput = {
+  amortizationPerKm: number;
+  fuelPrice: number;
+  consumption: number;
+  totalKm: number;
+  cities: { cityId: number }[];
 };

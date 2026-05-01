@@ -1,73 +1,52 @@
 import { Router } from "express";
 
-import { createTrips, getTripsByUserId } from "../services/trip.service";
-
-import { calculate } from "../../utils/calc";
+import { calculateTrip } from "../../utils/calc";
+import { createTrip } from "../services/trip.service";
 import { formatTripsMessage } from "../../utils/formatTripsMessage";
-
 import { bot } from "../../shared/telegram";
 
 const router = Router();
 
 router.post("/create", async (req, res) => {
 	try {
-		const { userId, carName, consumption, fuelPrice, trips } = req.body;
+		const tripData = req.body;
 
-		// if (!Array.isArray(trips) || trips.length === 0) {
-		// 	return res.status(400).json({
-		// 		success: false,
-		// 		error: "Trips required"
-		// 	});
-		// }
+		if (!tripData?.cities?.length) {
+			return res.status(400).json({
+				success: false,
+				error: "cities required",
+			});
+		}
 
-		const results = trips.map((t: any) => {
-			const { fuelUsed, cost } = calculate(consumption, t.km, fuelPrice);
+		const calc = calculateTrip(tripData);
 
-			return {
-				userId,
-				carName,
-				consumption,
-				fuelPrice,
-				city: t.city,
-				km: t.km,
-				fuelUsed,
-				cost
-			};
+		const trip = await createTrip({
+			...tripData,
+			...calc,
 		});
 
-		await createTrips(results);
-
-		const total = results.reduce((sum: number, r: any) => sum + r.cost, 0);
-
-		const message = formatTripsMessage({ carName, consumption, results, total });
+		const message = formatTripsMessage({
+			...trip,
+			...calc
+		});
 
 		try {
-			await bot.telegram.sendMessage(Number(userId), message);
+			await bot.telegram.sendMessage(tripData.userId, message);
 		} catch (e) {
-			console.error("Telegram send error", e);
+			console.error("Telegram error", e);
 		}
 
 		res.json({
 			success: true,
-			results
+			trip,
 		});
-	} catch (error) {
-		console.error(error);
+	} catch (e) {
+		console.error(e);
+
 		res.status(500).json({
 			success: false,
-			error: "Помилка створення поїздок"
+			error: "Server error",
 		});
-	}
-});
-
-router.get("/trips/:userId", async (req, res) => {
-	try {
-		const { userId } = req.params;
-		const trips = await getTripsByUserId(Number(userId));
-		res.json(trips);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Помилка отримання поїздок" });
 	}
 });
 

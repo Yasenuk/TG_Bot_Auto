@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cors from "cors";
 
 import trips from "./routes/trip";
+import cities from "./routes/city";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api", trips);
+app.use("/api", cities);
 
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
