@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import styles from "./app.module.scss";
 import From from './components/Form';
 

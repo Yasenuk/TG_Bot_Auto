@@ -1,51 +1,58 @@
 import { Router } from "express";
 
-import { calculateTrip } from "../../utils/calc";
+import { getCarById } from "../services/car.service";
 import { createTrip } from "../services/trip.service";
-import { formatTripsMessage } from "../../utils/formatTripsMessage";
-import { bot } from "../../shared/telegram";
+
+import { sendTelegramMessage } from "../helpers/bot";
+
+import { calculateTrip } from "../utils/calc";
+import { formatTripsMessage } from "../utils/formatTripsMessage";
 
 const router = Router();
 
 router.post("/create", async (req, res) => {
 	try {
-		const tripData = req.body;
+		const body = req.body;
 
-		if (!tripData?.cities?.length) {
-			return res.status(400).json({
+		const car = await getCarById(body.carId);
+
+		if (!car) {
+			return res.status(404).json({
 				success: false,
-				error: "cities required",
+				message: "Car not found"
 			});
 		}
 
-		const calc = calculateTrip(tripData);
+		const calc = calculateTrip({
+			totalKm: body.totalKm,
+			consumption: body.consumption,
+			fuelPrice: body.fuelPrice,
+			amortizationPerKm: car.amortizationPerKm,
+			citiesCount: body.cities.length
+		});
 
 		const trip = await createTrip({
-			...tripData,
-			...calc,
-		});
-
-		const message = formatTripsMessage({
-			...trip,
+			...body,
 			...calc
-		});
+		})
 
-		try {
-			await bot.telegram.sendMessage(tripData.userId, message);
-		} catch (e) {
-			console.error("Telegram error", e);
-		}
+		const message = formatTripsMessage(trip);
+
+		await sendTelegramMessage(body.userId, message);
 
 		res.json({
 			success: true,
-			trip,
+			trip: {
+				...trip,
+				userId: trip.userId.toString()
+			}
 		});
-	} catch (e) {
-		console.error(e);
+
+	} catch (err) {
+		console.log(err);
 
 		res.status(500).json({
-			success: false,
-			error: "Server error",
+			success: false
 		});
 	}
 });

@@ -1,14 +1,14 @@
 import { Router } from "express";
 
-import { getCities } from "../services/city.service";
+import { getCars } from "../services/car.service";
 
 const router = Router();
 
-router.get("/cities", async (_, res) => {
+router.get("/cars", async (_, res) => {
 	try {
-		const cities = await getCities();
+		const cars = await getCars();
 
-		res.json(cities);
+		res.json(cars);
 	} catch (e) {
 		console.error(e);
 

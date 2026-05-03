@@ -1,5 +1,19 @@
 import { prisma } from "../prisma";
 
 export async function getCities() {
-	return await prisma.city.findMany();
+	return prisma.city.findMany({
+		orderBy: {
+			name: "asc"
+		}
+	});
+}
+
+export async function createCity(
+	name: string
+) {
+	return prisma.city.create({
+		data: {
+			name
+		}
+	});
 }

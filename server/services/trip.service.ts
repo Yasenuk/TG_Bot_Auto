@@ -1,49 +1,41 @@
 import { prisma } from "../prisma";
+import { CreateTripPayload } from "../shared/types";
 
-export async function createTrip(data: any) {
-  return prisma.trip.create({
-    data: {
-      userId: data.userId,
-      carName: data.carName,
+export async function createTrip(data: CreateTripPayload) {
+	return prisma.trip.create({
+		data: {
+			userId: data.userId,
+			username: data.username,
 
-      amortizationPerKm: data.amortizationPerKm,
-      fuelPrice: data.fuelPrice,
-      consumption: data.consumption,
-      totalKm: data.totalKm,
+			carId: data.carId,
 
-      totalAmortization: data.totalAmortization,
-      totalFuelLiters: data.totalFuelLiters,
-      totalFuelCost: data.totalFuelCost,
+			consumption: data.consumption,
+			fuelPrice: data.fuelPrice,
+			totalKm: data.totalKm,
 
-      cities: {
-        create: data.cities.map((c: any) => ({
-          cityId: c.cityId,
+			amortizationCost: data.amortizationCost,
+			fuelUsed: data.fuelUsed,
+			fuelCost: data.fuelCost,
 
-          amortizationShare: data.perCity.amortization,
-          fuelCostShare: data.perCity.fuelCost,
-          fuelLitersShare: data.perCity.fuelLiters,
-        })),
-      },
-    },
+			cities: {
+				create: data.cities.map(city => ({
+					cityId: city.cityId,
 
-    include: {
-      cities: {
-        include: {
-          city: true,
-        },
-      },
-    },
-  });
-}
+					amortizationCost:
+						data.perCityAmortization,
 
-export async function getTrips() {
-  return prisma.trip.findMany({
-    include: {
-      cities: {
-        include: {
-          city: true,
-        },
-      },
-    },
-  });
+					fuelCost:
+						data.perCityFuel,
+				}))
+			}
+		},
+		include: {
+			car: true,
+			cities: {
+				include: {
+					city: true
+				}
+			}
+		}
+	});
 }

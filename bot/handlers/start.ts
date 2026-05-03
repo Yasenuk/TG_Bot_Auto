@@ -8,16 +8,9 @@ export function startHandler(ctx: any) {
 • автомобіль
 • витрата пального
 • вартість пального
-• міста та кілометраж
-
-Після відправки бот порахує витрати по кожному місту.`,
-    Markup.inlineKeyboard([
-      [
-        Markup.button.webApp(
-          "📋 Відкрити форму",
-          "https://carry-unburned-payback.ngrok-free.dev"
-        )
-      ]
-    ])
+• міста та кілометраж`,
+    Markup.keyboard([
+      ["📊 Завантажити Excel"]
+    ]).resize()
   );
 }
