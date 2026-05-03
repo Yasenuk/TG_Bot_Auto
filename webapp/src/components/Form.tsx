@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 
 import styles from "./from.module.scss";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function Form() {
 	const [trips, setTrips] = useState([
 		{
@@ -35,12 +37,12 @@ function Form() {
 
 	useEffect(() => {
 		const load = async () => {
-			const carsRes = await fetch("/api/cars");
+			const carsRes = await fetch(`${API_URL}/api/cars`);
 			const carsData = await carsRes.json();
 
 			setCars(carsData);
 
-			const citiesRes = await fetch("/api/cities");
+			const citiesRes = await fetch(`${API_URL}/api/cities`);
 			const citiesData = await citiesRes.json();
 
 			setDepartments(citiesData);
@@ -83,7 +85,7 @@ function Form() {
 				}))
 		};
 
-		const res = await fetch("/api/create", {
+		const res = await fetch(`${API_URL}/api/create`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(payload),
