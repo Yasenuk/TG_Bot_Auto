@@ -6,6 +6,7 @@ import cors from "cors";
 import trips from "./routes/trip";
 import cities from "./routes/city";
 import cars from "./routes/car";
+import excel from "./routes/excel";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use("/api", trips);
 app.use("/api", cities);
 app.use("/api", cars);
+app.use("/api", excel);
 
 
 const port = process.env.PORT || 3333;
