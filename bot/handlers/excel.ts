@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const ADMIN_IDS: number[] = [
-  123456789,
+	467789119,
+	660682549
 ];
 
 export async function excelMenuHandler(ctx: any) {
