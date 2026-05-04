@@ -1,11 +1,14 @@
 import { bot } from "./shared/telegram";
 
 import { startHandler } from "./handlers/start";
-import { excelHandler } from "./handlers/excel";
+import { excelCallbackHandler, excelMenuHandler } from "./handlers/excel";
 
 bot.start((ctx) => startHandler(ctx));
 
-bot.hears("📊 Завантажити Excel", async (ctx) => await excelHandler(ctx));
+bot.command("excel", excelMenuHandler);
+
+bot.action("excel_my",  excelCallbackHandler);
+bot.action("excel_all", excelCallbackHandler);
 
 
 bot.launch();
