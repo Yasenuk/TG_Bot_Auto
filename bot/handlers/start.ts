@@ -1,5 +1,3 @@
-import { Markup } from "telegraf";
-
 export function startHandler(ctx: any) {
   return ctx.reply(
     `🚗 Облік витрат пального
@@ -8,9 +6,6 @@ export function startHandler(ctx: any) {
 • автомобіль
 • витрата пального
 • вартість пального
-• міста та кілометраж`,
-    Markup.keyboard([
-      ["📊 Завантажити Excel"]
-    ]).resize()
+• міста та кілометраж`
   );
 }
