@@ -45,7 +45,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       "Місто",
       "Км (маршрут)",
       "Пальне (л)",
-      "Вартість пального",
+      "Сума за пальне",
       "Амортизація",
       "Ціна пального",
       "Дата",
@@ -58,13 +58,13 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
     };
 
     sheet.columns = [
-      { key: "city",         width: 30 },
-      { key: "km",           width: 14 },
-      { key: "fuelUsed",     width: 14 },
-      { key: "fuelCost",     width: 20 },
+      { key: "city", width: 30 },
+      { key: "km", width: 14 },
+      { key: "fuelUsed", width: 14 },
+      { key: "fuelCost", width: 20 },
       { key: "amortization", width: 18 },
-      { key: "fuelPrice",    width: 16 },
-      { key: "date",         width: 22 },
+      { key: "fuelPrice", width: 16 },
+      { key: "date", width: 22 },
     ];
 
     // Лічильники для підсумків
@@ -83,20 +83,26 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
           // Км та пальне показуємо тільки в першому рядку поїздки
           index === 0 ? trip.totalKm : "",
           index === 0 ? Number(trip.fuelUsed).toFixed(2) : "",
-          Number(tc.fuelCost).toFixed(2),         // вартість по місту
+          Number(tc.fuelCost).toFixed(2),         // сума за пальне по місту
           Number(tc.amortizationCost).toFixed(2), // амортизація по місту
           index === 0 ? trip.fuelPrice : "",
           index === 0 ? dateStr : "",
         ]);
-        row.alignment = { vertical: "middle", wrapText: true };
+        row.alignment = { vertical: "top", wrapText: true };
 
         // Злиття клітинок для км/пальне якщо кілька міст
         if (index === 0 && cityCount > 1) {
           const rowNum = row.number;
+
           sheet.mergeCells(rowNum, 2, rowNum + cityCount - 1, 2); // Км
           sheet.mergeCells(rowNum, 3, rowNum + cityCount - 1, 3); // Пальне
           sheet.mergeCells(rowNum, 6, rowNum + cityCount - 1, 6); // Ціна
           sheet.mergeCells(rowNum, 7, rowNum + cityCount - 1, 7); // Дата
+
+          for (const col of [2, 3, 6, 7]) {
+            const cell = sheet.getCell(rowNum, col);
+            cell.alignment = { vertical: "top", horizontal: "left", wrapText: true };
+          }
         }
       });
 
