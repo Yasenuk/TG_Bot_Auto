@@ -77,10 +77,11 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       const dateStr = new Date(trip.createdAt).toLocaleString("uk-UA");
       const cityCount = trip.cities.length;
 
+      let firstRowNum = 0;
+
       trip.cities.forEach((tc, index) => {
         const row = sheet.addRow([
           tc.city.name,
-          // Км та пальне показуємо тільки в першому рядку поїздки
           index === 0 ? trip.totalKm : "",
           index === 0 ? Number(trip.fuelUsed).toFixed(2) : "",
           Number(tc.fuelCost).toFixed(2),         // сума за пальне по місту
@@ -88,34 +89,28 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
           index === 0 ? trip.fuelPrice : "",
           index === 0 ? dateStr : "",
         ]);
+
         row.alignment = { vertical: "top", wrapText: true };
 
-        // Злиття клітинок для км/пальне якщо кілька міст
-        if (index === 0 && cityCount > 1) {
-          const rowNum = row.number;
-
-          sheet.mergeCells(rowNum, 2, rowNum + cityCount - 1, 2); // Км
-          sheet.mergeCells(rowNum, 3, rowNum + cityCount - 1, 3); // Пальне
-          sheet.mergeCells(rowNum, 6, rowNum + cityCount - 1, 6); // Ціна
-          sheet.mergeCells(rowNum, 7, rowNum + cityCount - 1, 7); // Дата
-
-          for (const col of [2, 3, 6, 7]) {
-            const cell = sheet.getCell(rowNum, col);
-            cell.alignment = { vertical: "top", horizontal: "left", wrapText: true };
-          }
-        }
+        if (index === 0) firstRowNum = row.number;
       });
+
+      if (cityCount > 1) {
+        for (const col of [2, 3, 6, 7]) {
+          sheet.mergeCells(firstRowNum, col, firstRowNum + cityCount - 1, col);
+          const cell = sheet.getCell(firstRowNum, col);
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+        }
+      }
 
       totalKm += trip.totalKm;
       totalFuelUsed += Number(trip.fuelUsed);
       totalFuelCost += Number(trip.fuelCost);
       totalAmortization += Number(trip.amortizationCost);
 
-      // Розділювач між поїздками
       sheet.addRow([]).height = 4;
     }
 
-    // Підсумковий рядок
     sheet.addRow([]);
     const totalRow = sheet.addRow([
       "РАЗОМ:",
