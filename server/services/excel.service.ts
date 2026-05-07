@@ -42,6 +42,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       "Місто",
       "Км (маршрут)",
       "Пальне (л)",
+      "Розхід (л/100км)",
       "Сума за пальне",
       "Амортизація",
       "Ціна пального",
@@ -58,6 +59,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       { key: "city", width: 30 },
       { key: "km", width: 14 },
       { key: "fuelUsed", width: 14 },
+      { key: "consumption", width: 14 },
       { key: "fuelCost", width: 20 },
       { key: "amortization", width: 18 },
       { key: "fuelPrice", width: 16 },
@@ -68,6 +70,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
     let totalFuelUsed = 0;
     let totalFuelCost = 0;
     let totalAmortization = 0;
+    let totalСonsumption = 0;
 
     for (const trip of carTrips) {
       const dateStr = new Date(trip.createdAt).toLocaleString("uk-UA");
@@ -80,6 +83,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
           tc.city.name,
           index === 0 ? trip.totalKm : "",
           index === 0 ? Number(trip.fuelUsed).toFixed(2) : "",
+          index === 0 ? Number(trip.consumption).toFixed(2) : "",
           Number(tc.fuelCost).toFixed(2),
           Number(tc.amortizationCost).toFixed(2),
           index === 0 ? trip.fuelPrice : "",
@@ -92,7 +96,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       });
 
       if (cityCount > 1) {
-        for (const col of [2, 3, 6, 7]) {
+        for (const col of [2, 3, 4, 7, 8]) {
           sheet.mergeCells(firstRowNum, col, firstRowNum + cityCount - 1, col);
           const cell = sheet.getCell(firstRowNum, col);
           cell.alignment = { vertical: "middle", horizontal: "center" };
@@ -103,6 +107,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       totalFuelUsed += Number(trip.fuelUsed);
       totalFuelCost += Number(trip.fuelCost);
       totalAmortization += Number(trip.amortizationCost);
+      totalСonsumption += Number(trip.consumption);
 
       sheet.addRow([]).height = 4;
     }
@@ -112,6 +117,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       "РАЗОМ:",
       totalKm.toFixed(1),
       totalFuelUsed.toFixed(2),
+      totalСonsumption.toFixed(2),
       totalFuelCost.toFixed(2),
       totalAmortization.toFixed(2),
     ]);
