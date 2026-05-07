@@ -19,7 +19,6 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
 
   const workbook = new ExcelJS.Workbook();
 
-  // Групуємо по машинах
   const grouped = new Map<string, typeof trips>();
   for (const trip of trips) {
     const carName = trip.car.name;
@@ -35,12 +34,10 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
   for (const [carName, carTrips] of grouped.entries()) {
     const sheet = workbook.addWorksheet(carName.slice(0, 31));
 
-    // Заголовок аркуша
     sheet.addRow([`Автомобіль: ${carName}`]).font = { bold: true, size: 14 };
     sheet.mergeCells(1, 1, 1, 7);
-    sheet.addRow([]); // порожній рядок
+    sheet.addRow([]);
 
-    // Заголовки колонок
     const headerRow = sheet.addRow([
       "Місто",
       "Км (маршрут)",
@@ -67,7 +64,6 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       { key: "date", width: 22 },
     ];
 
-    // Лічильники для підсумків
     let totalKm = 0;
     let totalFuelUsed = 0;
     let totalFuelCost = 0;
@@ -84,8 +80,8 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
           tc.city.name,
           index === 0 ? trip.totalKm : "",
           index === 0 ? Number(trip.fuelUsed).toFixed(2) : "",
-          Number(tc.fuelCost).toFixed(2),         // сума за пальне по місту
-          Number(tc.amortizationCost).toFixed(2), // амортизація по місту
+          Number(tc.fuelCost).toFixed(2),
+          Number(tc.amortizationCost).toFixed(2),
           index === 0 ? trip.fuelPrice : "",
           index === 0 ? dateStr : "",
         ]);
@@ -124,6 +120,20 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "FFFFF2CC" },
+    };
+
+    sheet.addRow([]);
+    const avgConsumption = (totalFuelUsed / totalKm) * 100;
+    const avgRow = sheet.addRow([
+      "СЕРЕДНІЙ РОЗХІД (л/100км):",
+      "",
+      avgConsumption.toFixed(2),
+    ]);
+    avgRow.font = { bold: true };
+    avgRow.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFE2EFDA" },
     };
   }
 
