@@ -150,7 +150,7 @@ router.delete("/admin/cities/:id", requireAdmin, async (req, res) => {
 router.get("/admin/admins", requireAdmin, async (_, res) => {
 	try {
 		const admins = await getAdmins();
-		res.json(admins.map(a => ({ ...a, userId: a.userId.toString() })));
+		res.json(admins.map((a: { id: number; userId: bigint; username: string | null }) => ({ ...a, userId: a.userId.toString() })));
 	} catch (e) {
 		res.status(500).json({ error: "Server error" });
 	}
@@ -169,7 +169,7 @@ router.post("/admin/admins", requireAdmin, async (req, res) => {
 
 router.delete("/admin/admins/:userId", requireAdmin, async (req, res) => {
 	try {
-		await removeAdmin(BigInt(req.params.userId));
+		await removeAdmin(BigInt(req.params.userId as string));
 		res.json({ success: true });
 	} catch (e) {
 		res.status(500).json({ error: "Server error" });
