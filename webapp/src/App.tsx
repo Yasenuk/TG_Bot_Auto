@@ -1,10 +1,44 @@
+import { useEffect, useState } from "react";
 import styles from "./app.module.scss";
-import From from './components/Form';
+import Form from "./components/Form";
+import AdminPanel from "./components/AdminPanel";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function App() {
-  return (
-    <div className={styles.container}>
-      <From></From>
-    </div>
-  );
+	const [userId, setUserId] = useState<string | null>(null);
+	const [isAdmin, setIsAdmin] = useState(false);
+	const [checked, setChecked] = useState(false);
+
+	useEffect(() => {
+		const tg = (window as any).Telegram?.WebApp;
+		if (!tg) { setChecked(true); return; }
+
+		tg.ready();
+		tg.expand();
+
+		const uid = tg.initDataUnsafe?.user?.id;
+		if (!uid) { setChecked(true); return; }
+
+		const uidStr = String(uid);
+		setUserId(uidStr);
+
+		fetch(`${API_URL}/api/admin/check`, {
+			headers: { "x-user-id": uidStr }
+		})
+			.then(r => r.json())
+			.then(d => setIsAdmin(d.isAdmin))
+			.finally(() => setChecked(true));
+	}, []);
+
+	if (!checked) return null;
+
+	return (
+		<div className={styles.container}>
+			{isAdmin && userId
+				? <AdminPanel userId={userId} />
+				: <Form />
+			}
+		</div>
+	);
 }

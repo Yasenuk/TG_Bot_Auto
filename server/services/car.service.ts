@@ -27,3 +27,18 @@ export async function createCar(
 		}
 	});
 }
+
+export async function updateCar(
+	id: number,
+	name: string,
+	amortizationPerKm: number
+) {
+	return prisma.car.update({
+		where: { id },
+		data: { name, amortizationPerKm }
+	});
+}
+
+export async function deleteCar(id: number) {
+	return prisma.car.delete({ where: { id } });
+}

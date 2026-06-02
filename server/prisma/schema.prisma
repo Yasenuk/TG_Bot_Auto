@@ -55,3 +55,9 @@ model TripCity {
   amortizationCost Float
   fuelCost         Float
 }
+
+model Admin {
+  id        Int     @id @default(autoincrement())
+  userId    BigInt  @unique
+  username  String?
+}

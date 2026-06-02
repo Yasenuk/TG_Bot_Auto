@@ -7,6 +7,7 @@ import trips from "./routes/trip";
 import cities from "./routes/city";
 import cars from "./routes/car";
 import excel from "./routes/excel";
+import admin from "./routes/admin";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use("/api", trips);
 app.use("/api", cities);
 app.use("/api", cars);
 app.use("/api", excel);
+app.use("/api", admin);
 
 
 const port = process.env.PORT || 3333;
