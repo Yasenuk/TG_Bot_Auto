@@ -4,7 +4,12 @@ import styles from "./from.module.scss";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-function Form() {
+interface FormProps {
+	isAdmin?: boolean;
+	onAdminClick?: () => void;
+}
+
+function Form({ isAdmin, onAdminClick }: FormProps) {
 	const [trips, setTrips] = useState([
 		{
 			cityId: 0
@@ -220,6 +225,16 @@ function Form() {
 			>
 				Відправити
 			</button>
+
+			{isAdmin && (
+				<button
+					className={`${styles.form__button} ${styles.form__button_secondary}`}
+					type="button"
+					onClick={onAdminClick}
+				>
+					⚙️ Адмін панель
+				</button>
+			)}
 		</form>
 	);
 }

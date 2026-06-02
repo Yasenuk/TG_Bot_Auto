@@ -371,7 +371,7 @@ function AdminsTab({ userId }: { userId: string }) {
 
 // ── Root ──────────────────────────────────────────────────
 
-export default function AdminPanel({ userId }: { userId: string }) {
+export default function AdminPanel({ userId, onBack }: { userId: string; onBack: () => void }) {
 	const [tab, setTab] = useState<Tab>("trips");
 
 	const tabs: { key: Tab; label: string }[] = [
@@ -383,6 +383,10 @@ export default function AdminPanel({ userId }: { userId: string }) {
 
 	return (
 		<div className={styles.panel}>
+			<div className={styles.header}>
+				<button className={styles.backBtn} onClick={onBack}>← Назад</button>
+				<span className={styles.headerTitle}>Адмін панель</span>
+			</div>
 			<div className={styles.tabs}>
 				{tabs.map(t => (
 					<button
