@@ -77,6 +77,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       const cityCount = trip.cities.length;
 
       let firstRowNum = 0;
+      let lastRowNum = 0;
 
       trip.cities.forEach((tc, index) => {
         const row = sheet.addRow([
@@ -93,6 +94,7 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
         row.alignment = { vertical: "top", wrapText: true };
 
         if (index === 0) firstRowNum = row.number;
+        lastRowNum = row.number;
       });
 
       if (cityCount > 1) {
@@ -103,16 +105,18 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
         }
       }
 
+      for (let col = 1; col <= 8; col++) {
+        const cell = sheet.getCell(lastRowNum, col);
+        cell.border = { ...cell.border, bottom: { style: "thin" } };
+      }
+
       totalKm += trip.totalKm;
       totalFuelUsed += Number(trip.fuelUsed);
       totalFuelCost += Number(trip.fuelCost);
       totalAmortization += Number(trip.amortizationCost);
       totalСonsumption += Number(trip.consumption);
-
-      sheet.addRow([]).height = 4;
     }
 
-    sheet.addRow([]);
     const totalRow = sheet.addRow([
       "РАЗОМ:",
       totalKm.toFixed(1),
@@ -127,9 +131,11 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       pattern: "solid",
       fgColor: { argb: "FFFFF2CC" },
     };
+    totalRow.eachCell({ includeEmpty: true }, (cell) => {
+      cell.border = { top: { style: "medium" } };
+    });
 
-    sheet.addRow([]);
-    const avgConsumption = (totalFuelUsed / totalKm) * 100;
+    const avgConsumption = totalKm > 0 ? (totalFuelUsed / totalKm) * 100 : 0;
     const avgRow = sheet.addRow([
       "СЕРЕДНІЙ РОЗХІД (л/100км):",
       "",
