@@ -32,11 +32,61 @@ function getTripTotalCost(t: Trip) {
 
 // ── Trips Tab ───────────────────────────────────────────
 
+const MONTH_NAMES = [
+	"Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+	"Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+];
+
+function toMonthKey(year: number, monthIndex: number) {
+	return `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
+}
+
+function formatMonth(monthKey: string) {
+	const [year, month] = monthKey.split("-").map(Number);
+	return `${MONTH_NAMES[month - 1]} ${year}`;
+}
+
+function MonthPicker({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+	const [year, month] = value.split("-").map(Number);
+	const now = new Date();
+	const currentYear = now.getFullYear();
+	const isCurrentMonth = year === currentYear && month - 1 === now.getMonth();
+
+	const fromYear = Math.min(year, currentYear - 4);
+	const years = Array.from({ length: currentYear - fromYear + 1 }, (_, i) => currentYear - i);
+
+	const shift = (delta: number) => {
+		const date = new Date(year, month - 1 + delta, 1);
+		onChange(toMonthKey(date.getFullYear(), date.getMonth()));
+	};
+
+	return (
+		<div className={styles.monthPicker}>
+			<button type="button" className={`${styles.btn} ${styles.btn_secondary}`}
+				onClick={() => shift(-1)} aria-label="Попередній місяць">‹</button>
+			<select className={styles.input} value={month - 1}
+				onChange={e => onChange(toMonthKey(year, Number(e.target.value)))}>
+				{MONTH_NAMES.map((name, i) => (
+					<option key={name} value={i} disabled={year === currentYear && i > now.getMonth()}>{name}</option>
+				))}
+			</select>
+			<select className={`${styles.input} ${styles.monthPicker__year}`} value={year}
+				onChange={e => {
+					const nextYear = Number(e.target.value);
+					const nextMonth = nextYear === currentYear ? Math.min(month - 1, now.getMonth()) : month - 1;
+					onChange(toMonthKey(nextYear, nextMonth));
+				}}>
+				{years.map(y => <option key={y} value={y}>{y}</option>)}
+			</select>
+			<button type="button" className={`${styles.btn} ${styles.btn_secondary}`}
+				onClick={() => shift(1)} disabled={isCurrentMonth} aria-label="Наступний місяць">›</button>
+		</div>
+	);
+}
+
 function TripsTab({ userId }: { userId: string }) {
 	const now = new Date();
-	const [month, setMonth] = useState(
-		`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-	);
+	const [month, setMonth] = useState(toMonthKey(now.getFullYear(), now.getMonth()));
 	const [trips, setTrips] = useState<Trip[]>([]);
 	const [selected, setSelected] = useState<Set<number>>(new Set());
 	const [loading, setLoading] = useState(false);
@@ -77,7 +127,7 @@ function TripsTab({ userId }: { userId: string }) {
 	};
 
 	const deleteMonth = async () => {
-		if (!confirm(`Видалити всі поїздки за ${month}?`)) return;
+		if (!confirm(`Видалити всі поїздки за ${formatMonth(month)}?`)) return;
 		await fetch(`${API_URL}/api/admin/trips/month`, {
 			method: "DELETE",
 			headers: getHeaders(userId),
@@ -89,12 +139,7 @@ function TripsTab({ userId }: { userId: string }) {
 	return (
 		<div className={styles.tab}>
 			<div className={styles.toolbar}>
-				<input
-					type="month"
-					className={styles.input}
-					value={month}
-					onChange={e => setMonth(e.target.value)}
-				/>
+				<MonthPicker value={month} onChange={setMonth} />
 				<button className={styles.btn} onClick={load}>Оновити</button>
 			</div>
 
@@ -117,7 +162,7 @@ function TripsTab({ userId }: { userId: string }) {
 			{loading && <p className={styles.hint}>Завантаження...</p>}
 
 			{!loading && trips.length === 0 && (
-				<p className={styles.hint}>Немає поїздок за {month}</p>
+				<p className={styles.hint}>Немає поїздок за {formatMonth(month)}</p>
 			)}
 
 			{trips.map(t => (
