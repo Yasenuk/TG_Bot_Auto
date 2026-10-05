@@ -18,6 +18,13 @@ async function requireAdmin(req: Request, res: Response, next: NextFunction) {
 	next();
 }
 
+// Empty → 0 (без націнки); NaN або від'ємне → null (невалідне)
+function parseMarkupPercent(value: unknown): number | null {
+	if (value === undefined || value === null || value === "") return 0;
+	const percent = Number(value);
+	return Number.isFinite(percent) && percent >= 0 ? percent : null;
+}
+
 // Check if current user is admin
 router.get("/admin/check", async (req, res) => {
 	const userId = req.headers["x-user-id"];
@@ -81,7 +88,9 @@ router.post("/admin/cars", requireAdmin, async (req, res) => {
 	try {
 		const { name, amortizationPerKm } = req.body;
 		if (!name || amortizationPerKm == null) return res.status(400).json({ error: "name and amortizationPerKm required" });
-		const car = await createCar(name, Number(amortizationPerKm));
+		const amortizationMarkupPercent = parseMarkupPercent(req.body.amortizationMarkupPercent);
+		if (amortizationMarkupPercent === null) return res.status(400).json({ error: "amortizationMarkupPercent must be a number >= 0" });
+		const car = await createCar({ name, amortizationPerKm: Number(amortizationPerKm), amortizationMarkupPercent });
 		res.json(car);
 	} catch (e) {
 		res.status(500).json({ error: "Server error" });
@@ -91,7 +100,9 @@ router.post("/admin/cars", requireAdmin, async (req, res) => {
 router.put("/admin/cars/:id", requireAdmin, async (req, res) => {
 	try {
 		const { name, amortizationPerKm } = req.body;
-		const car = await updateCar(Number(req.params.id), name, Number(amortizationPerKm));
+		const amortizationMarkupPercent = parseMarkupPercent(req.body.amortizationMarkupPercent);
+		if (amortizationMarkupPercent === null) return res.status(400).json({ error: "amortizationMarkupPercent must be a number >= 0" });
+		const car = await updateCar(Number(req.params.id), { name, amortizationPerKm: Number(amortizationPerKm), amortizationMarkupPercent });
 		res.json(car);
 	} catch (e) {
 		res.status(500).json({ error: "Server error" });

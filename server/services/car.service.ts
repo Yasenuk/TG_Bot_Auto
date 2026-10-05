@@ -1,4 +1,5 @@
 import { prisma } from "../prisma";
+import { CarInput } from "../shared/types";
 
 export async function getCars() {
 	return prisma.car.findMany({
@@ -16,26 +17,14 @@ export async function getCarById(id: number) {
 	});
 }
 
-export async function createCar(
-	name: string,
-	amortizationPerKm: number
-) {
-	return prisma.car.create({
-		data: {
-			name,
-			amortizationPerKm
-		}
-	});
+export async function createCar(data: CarInput) {
+	return prisma.car.create({ data });
 }
 
-export async function updateCar(
-	id: number,
-	name: string,
-	amortizationPerKm: number
-) {
+export async function updateCar(id: number, data: CarInput) {
 	return prisma.car.update({
 		where: { id },
-		data: { name, amortizationPerKm }
+		data
 	});
 }
 

@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { prisma } from "../prisma";
+import { getTotalCost } from "../utils/calc";
 
 interface GenerateOptions {
   userId?: bigint;
@@ -45,6 +46,9 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       "Розхід (л/100км)",
       "Сума за пальне",
       "Амортизація",
+      "Націнка на амортизацію, %",
+      "Націнка на амортизацію, грн",
+      "Разом, грн",
       "Ціна пального",
       "Дата",
     ]);
@@ -62,6 +66,9 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       { key: "consumption", width: 14 },
       { key: "fuelCost", width: 20 },
       { key: "amortization", width: 18 },
+      { key: "markupPercent", width: 16 },
+      { key: "markupCost", width: 18 },
+      { key: "total", width: 16 },
       { key: "fuelPrice", width: 16 },
       { key: "date", width: 22 },
     ];
@@ -70,6 +77,8 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
     let totalFuelUsed = 0;
     let totalFuelCost = 0;
     let totalAmortization = 0;
+    let totalMarkup = 0;
+    let totalCost = 0;
     let totalСonsumption = 0;
 
     for (const trip of carTrips) {
@@ -87,6 +96,9 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
           index === 0 ? Number(trip.consumption).toFixed(2) : "",
           Number(tc.fuelCost).toFixed(2),
           Number(tc.amortizationCost).toFixed(2),
+          index === 0 ? `${trip.amortizationMarkupPercent}%` : "",
+          Number(tc.amortizationMarkupCost).toFixed(2),
+          getTotalCost(tc).toFixed(2),
           index === 0 ? trip.fuelPrice : "",
           index === 0 ? dateStr : "",
         ]);
@@ -98,14 +110,14 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       });
 
       if (cityCount > 1) {
-        for (const col of [2, 3, 4, 7, 8]) {
+        for (const col of [2, 3, 4, 7, 10, 11]) {
           sheet.mergeCells(firstRowNum, col, firstRowNum + cityCount - 1, col);
           const cell = sheet.getCell(firstRowNum, col);
           cell.alignment = { vertical: "middle", horizontal: "center" };
         }
       }
 
-      for (let col = 1; col <= 8; col++) {
+      for (let col = 1; col <= sheet.columns.length; col++) {
         const cell = sheet.getCell(lastRowNum, col);
         cell.border = { ...cell.border, bottom: { style: "thin" } };
       }
@@ -114,6 +126,8 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       totalFuelUsed += Number(trip.fuelUsed);
       totalFuelCost += Number(trip.fuelCost);
       totalAmortization += Number(trip.amortizationCost);
+      totalMarkup += Number(trip.amortizationMarkupCost);
+      totalCost += getTotalCost(trip);
       totalСonsumption += Number(trip.consumption);
     }
 
@@ -124,6 +138,9 @@ export async function generateTripsExcel({ userId }: GenerateOptions = {}) {
       totalСonsumption.toFixed(2),
       totalFuelCost.toFixed(2),
       totalAmortization.toFixed(2),
+      "",
+      totalMarkup.toFixed(2),
+      totalCost.toFixed(2),
     ]);
     totalRow.font = { bold: true };
     totalRow.fill = {

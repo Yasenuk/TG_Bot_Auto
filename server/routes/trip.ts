@@ -28,6 +28,7 @@ router.post("/create", async (req, res) => {
 			consumption: body.consumption,
 			fuelPrice: body.fuelPrice,
 			amortizationPerKm: car.amortizationPerKm,
+			amortizationMarkupPercent: car.amortizationMarkupPercent,
 			citiesCount: body.cities.length
 		});
 

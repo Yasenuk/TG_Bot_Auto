@@ -69,6 +69,11 @@
 	gap: 8px;
 	flex-wrap: wrap;
 	align-items: center;
+
+	&_column {
+		flex-direction: column;
+		align-items: stretch;
+	}
 }
 
 .input {
