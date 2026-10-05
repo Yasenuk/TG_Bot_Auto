@@ -10,8 +10,8 @@ model Car {
   id                 Int      @id @default(autoincrement())
   name               String
   amortizationPerKm  Float
-  // Націнка на амортизацію у % (10 = +10% до суми амортизації)
-  amortizationMarkupPercent Float @default(0)
+
+  consumptionMarkupPercent Float @default(0)
 
   trips              Trip[]
 }
@@ -33,13 +33,11 @@ model Trip {
   car                Car        @relation(fields: [carId], references: [id])
 
   consumption        Float
+  consumptionMarkupPercent Float @default(0)
   fuelPrice          Float
   totalKm            Float
 
   amortizationCost   Float
-  // Знімок націнки авто на момент створення поїздки
-  amortizationMarkupPercent Float @default(0)
-  amortizationMarkupCost    Float @default(0)
   fuelUsed           Float
   fuelCost           Float
 
@@ -58,7 +56,6 @@ model TripCity {
   city        City    @relation(fields: [cityId], references: [id])
 
   amortizationCost Float
-  amortizationMarkupCost Float @default(0)
   fuelCost         Float
 }
 

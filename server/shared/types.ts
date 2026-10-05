@@ -16,8 +16,8 @@ export interface CreateTripDto {
 export interface CarInput {
 	name: string;
 	amortizationPerKm: number;
-	/** Націнка на амортизацію у %, напр. 10 = +10% */
-	amortizationMarkupPercent: number;
+	/** Націнка на розхід пального у %, напр. 10 → 18 л/100км рахується як 19.8 */
+	consumptionMarkupPercent: number;
 }
 
 export interface CalcInput {
@@ -25,7 +25,7 @@ export interface CalcInput {
 	consumption: number;
 	fuelPrice: number;
 	amortizationPerKm: number;
-	amortizationMarkupPercent: number;
+	consumptionMarkupPercent: number;
 	citiesCount: number;
 }
 
@@ -40,14 +40,12 @@ export interface CreateTripPayload {
 	totalKm: number;
 
 	amortizationCost: number;
-	amortizationMarkupPercent: number;
-	amortizationMarkupCost: number;
+	consumptionMarkupPercent: number;
 	fuelUsed: number;
 	fuelCost: number;
 
 	perCityFuel: number;
 	perCityAmortization: number;
-	perCityAmortizationMarkup: number;
 
 	cities: {
 		cityId: number;

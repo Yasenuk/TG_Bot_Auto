@@ -48,12 +48,12 @@ export async function createTrip(data: CreateTripPayload) {
 			carId: data.carId,
 
 			consumption: data.consumption,
+			consumptionMarkupPercent: data.consumptionMarkupPercent,
 			fuelPrice: data.fuelPrice,
 			totalKm: data.totalKm,
 
 			amortizationCost: data.amortizationCost,
-			amortizationMarkupPercent: data.amortizationMarkupPercent,
-			amortizationMarkupCost: data.amortizationMarkupCost,
+
 			fuelUsed: data.fuelUsed,
 			fuelCost: data.fuelCost,
 
@@ -63,9 +63,6 @@ export async function createTrip(data: CreateTripPayload) {
 
 					amortizationCost:
 						data.perCityAmortization,
-
-					amortizationMarkupCost:
-						data.perCityAmortizationMarkup,
 
 					fuelCost:
 						data.perCityFuel,

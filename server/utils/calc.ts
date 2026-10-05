@@ -1,7 +1,15 @@
 import { CalcInput } from "../shared/types";
 
+/** Розхід з націнкою: 18 л/100км + 10% → 19.8 л/100км */
+export function getConsumptionWithMarkup(consumption: number, markupPercent: number) {
+	return consumption * (1 + markupPercent / 100);
+}
+
 export function calculateTrip(data: CalcInput) {
-	const fuelUsed = (data.totalKm / 100) * data.consumption;
+	const consumptionWithMarkup =
+		getConsumptionWithMarkup(data.consumption, data.consumptionMarkupPercent);
+
+	const fuelUsed = (data.totalKm / 100) * consumptionWithMarkup;
 
 	const fuelCost = fuelUsed * data.fuelPrice;
 
@@ -14,30 +22,18 @@ export function calculateTrip(data: CalcInput) {
 	const perCityAmortization =
 		amortizationCost / data.citiesCount;
 
-	const amortizationMarkupCost =
-		amortizationCost * (data.amortizationMarkupPercent / 100);
-
-	const perCityAmortizationMarkup =
-		amortizationMarkupCost / data.citiesCount;
-
 	return {
 		fuelUsed,
 		fuelCost,
 		amortizationCost,
-		amortizationMarkupPercent: data.amortizationMarkupPercent,
-		amortizationMarkupCost,
+		consumptionMarkupPercent: data.consumptionMarkupPercent,
 
 		perCityFuel,
 		perCityAmortization,
-		perCityAmortizationMarkup,
 	};
 }
 
-/** Фінальна сума: пальне + амортизація + націнка на амортизацію (для поїздки або міста) */
-export function getTotalCost(costs: {
-	fuelCost: number;
-	amortizationCost: number;
-	amortizationMarkupCost: number;
-}) {
-	return costs.fuelCost + costs.amortizationCost + costs.amortizationMarkupCost;
+/** Фінальна сума: пальне (вже з націнкою на розхід) + амортизація — для поїздки або міста */
+export function getTotalCost(costs: { fuelCost: number; amortizationCost: number }) {
+	return costs.fuelCost + costs.amortizationCost;
 }

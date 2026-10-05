@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 type Tab = "trips" | "cities" | "cars" | "admins";
 
-interface Car { id: number; name: string; amortizationPerKm: number; amortizationMarkupPercent: number; }
+interface Car { id: number; name: string; amortizationPerKm: number; consumptionMarkupPercent: number; }
 interface City { id: number; name: string; }
 interface Admin { id: number; userId: string; username?: string; }
 interface Trip {
@@ -14,10 +14,10 @@ interface Trip {
 	username?: string;
 	car: Car;
 	totalKm: number;
+	consumption: number;
+	consumptionMarkupPercent: number;
 	fuelCost: number;
 	amortizationCost: number;
-	amortizationMarkupPercent: number;
-	amortizationMarkupCost: number;
 	createdAt: string;
 }
 
@@ -25,9 +25,9 @@ function getHeaders(userId: string) {
 	return { "Content-Type": "application/json", "x-user-id": userId };
 }
 
-// Фінальна сума поїздки: пальне + амортизація + націнка на амортизацію
+// Фінальна сума поїздки: пальне (вже з націнкою на розхід) + амортизація
 function getTripTotalCost(t: Trip) {
-	return t.fuelCost + t.amortizationCost + t.amortizationMarkupCost;
+	return t.fuelCost + t.amortizationCost;
 }
 
 // ── Trips Tab ───────────────────────────────────────────
@@ -186,7 +186,7 @@ function TripsTab({ userId }: { userId: string }) {
 						</span>
 					</div>
 					<div className={styles.card__meta}>
-						{t.car.name} · {t.totalKm} км · ⛽ {t.fuelCost.toFixed(2)} грн · 🔧 {t.amortizationCost.toFixed(2)} грн · 📈 +{t.amortizationMarkupCost.toFixed(2)} грн ({t.amortizationMarkupPercent}%) · 💰 {getTripTotalCost(t).toFixed(2)} грн
+						{t.car.name} · {t.totalKm} км · 📊 {t.consumption} л/100км (+{t.consumptionMarkupPercent}%) · ⛽ {t.fuelCost.toFixed(2)} грн · 🔧 {t.amortizationCost.toFixed(2)} грн · 💰 {getTripTotalCost(t).toFixed(2)} грн
 					</div>
 				</div>
 			))}
@@ -281,7 +281,7 @@ function CitiesTab({ userId }: { userId: string }) {
 
 // ── Cars Tab ─────────────────────────────────────────────
 
-const emptyCarForm = { name: "", amortizationPerKm: "", amortizationMarkupPercent: "" };
+const emptyCarForm = { name: "", amortizationPerKm: "", consumptionMarkupPercent: "" };
 
 function CarsTab({ userId }: { userId: string }) {
 	const [cars, setCars] = useState<Car[]>([]);
@@ -304,7 +304,7 @@ function CarsTab({ userId }: { userId: string }) {
 			body: JSON.stringify({
 				name: newData.name.trim(),
 				amortizationPerKm: Number(newData.amortizationPerKm),
-				amortizationMarkupPercent: Number(newData.amortizationMarkupPercent) || 0
+				consumptionMarkupPercent: Number(newData.consumptionMarkupPercent) || 0
 			})
 		});
 		setNewData(emptyCarForm);
@@ -318,7 +318,7 @@ function CarsTab({ userId }: { userId: string }) {
 			body: JSON.stringify({
 				name: editData.name,
 				amortizationPerKm: Number(editData.amortizationPerKm),
-				amortizationMarkupPercent: Number(editData.amortizationMarkupPercent) || 0
+				consumptionMarkupPercent: Number(editData.consumptionMarkupPercent) || 0
 			})
 		});
 		setEditId(null);
@@ -341,8 +341,8 @@ function CarsTab({ userId }: { userId: string }) {
 					onChange={e => setNewData({ ...newData, name: e.target.value })} />
 				<input className={styles.input} placeholder="Амортизація/км" type="number" value={newData.amortizationPerKm}
 					onChange={e => setNewData({ ...newData, amortizationPerKm: e.target.value })} />
-				<input className={styles.input} placeholder="Націнка на амортизацію, %" type="number" min={0} step="any" value={newData.amortizationMarkupPercent}
-					onChange={e => setNewData({ ...newData, amortizationMarkupPercent: e.target.value })} />
+				<input className={styles.input} placeholder="Націнка на розхід, %" type="number" min={0} step="any" value={newData.consumptionMarkupPercent}
+					onChange={e => setNewData({ ...newData, consumptionMarkupPercent: e.target.value })} />
 				<button className={styles.btn} onClick={add}>Додати</button>
 			</div>
 
@@ -354,8 +354,8 @@ function CarsTab({ userId }: { userId: string }) {
 								onChange={e => setEditData({ ...editData, name: e.target.value })} autoFocus />
 							<input className={styles.input} type="number" value={editData.amortizationPerKm}
 								onChange={e => setEditData({ ...editData, amortizationPerKm: e.target.value })} />
-							<input className={styles.input} placeholder="Націнка на амортизацію, %" type="number" min={0} step="any" value={editData.amortizationMarkupPercent}
-								onChange={e => setEditData({ ...editData, amortizationMarkupPercent: e.target.value })} />
+							<input className={styles.input} placeholder="Націнка на розхід, %" type="number" min={0} step="any" value={editData.consumptionMarkupPercent}
+								onChange={e => setEditData({ ...editData, consumptionMarkupPercent: e.target.value })} />
 							<div className={styles.card__row}>
 								<button className={styles.btn} onClick={() => save(c.id)}>Зберегти</button>
 								<button className={`${styles.btn} ${styles.btn_secondary}`} onClick={() => setEditId(null)}>Скасувати</button>
@@ -364,9 +364,9 @@ function CarsTab({ userId }: { userId: string }) {
 					) : (
 						<div className={styles.card__row}>
 							<span className={styles.card__title}>{c.name}</span>
-							<span className={styles.card__hint}>{c.amortizationPerKm} грн/км · +{c.amortizationMarkupPercent}%</span>
+							<span className={styles.card__hint}>{c.amortizationPerKm} грн/км · розхід +{c.consumptionMarkupPercent}%</span>
 							<button className={`${styles.btn} ${styles.btn_secondary}`}
-								onClick={() => { setEditId(c.id); setEditData({ name: c.name, amortizationPerKm: String(c.amortizationPerKm), amortizationMarkupPercent: String(c.amortizationMarkupPercent) }); }}>✏️</button>
+								onClick={() => { setEditId(c.id); setEditData({ name: c.name, amortizationPerKm: String(c.amortizationPerKm), consumptionMarkupPercent: String(c.consumptionMarkupPercent) }); }}>✏️</button>
 							<button className={`${styles.btn} ${styles.btn_danger}`} onClick={() => remove(c.id, c.name)}>🗑</button>
 						</div>
 					)}
